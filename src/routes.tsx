@@ -8,11 +8,11 @@ function TransactionRoutes() {
   return (
     <BrowserRouter>
       <Layout>
+        <ToastContainer position='top-right' delay={2000} />
         <Routes>
           <Route path='/transactions' element={<Transaction />} />
           <Route path='*' element={<Navigate to='/transactions' replace />} />
         </Routes>
-        <ToastContainer position='top-right' delay={2000} />
       </Layout>
     </BrowserRouter>
   );

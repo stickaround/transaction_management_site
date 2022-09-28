@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 import { Transaction } from '../types';
 
@@ -7,3 +7,9 @@ const api = axios.create({
 });
 
 export const getTransactions = () => api.get<Transaction[]>('/transactions');
+
+export const addTransaction = (transaction: Transaction) =>
+  api.post<Transaction, AxiosResponse<Transaction>>(
+    '/transactions',
+    transaction
+  );

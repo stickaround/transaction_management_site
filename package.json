@@ -54,6 +54,7 @@
     ]
   },
   "devDependencies": {
+    "@types/axios": "^0.14.0",
     "@types/react-router-dom": "^5.3.3",
     "@types/redux-thunk": "^2.1.0",
     "@types/yup": "^0.32.0"

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import * as React from 'react';
 import {
   Container,
   Paper,
@@ -21,6 +21,7 @@ import {
 } from '@mui/icons-material';
 
 import { Loader } from '../../core/Loader';
+import { TransactionAddModal } from './TransactionAddModal';
 import {
   getTransactionsSync,
   selectTransactions,
@@ -45,12 +46,19 @@ function Transaction() {
   const dispatch = useAppDispatch();
   const transactions = useAppSelector(selectTransactions);
   const loading = useAppSelector(selectTransactionLoading);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     dispatch(getTransactionsSync());
   }, [dispatch]);
 
-  const handleAddTransaction = () => {};
+  const handleAddTransaction = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
   return loading ? (
     <Loader />
@@ -103,13 +111,14 @@ function Transaction() {
                 <TableCell>
                   <Chip
                     label={transaction.status}
-                    color={getStatusColor(transaction.status)}
+                    color={getStatusColor(transaction.status ?? '')}
                   />
                 </TableCell>
                 <TableCell align='center'>
                   <IconButton
                     aria-label='edit'
                     disabled={transaction.status !== 'MANUAL'}
+                    sx={{ zIndex: 0 }}
                   >
                     <EditIcon />
                   </IconButton>
@@ -125,6 +134,7 @@ function Transaction() {
           </TableBody>
         </Table>
       </Paper>
+      <TransactionAddModal open={isModalOpen} onClose={handleCloseModal} />
     </Container>
   );
 }
