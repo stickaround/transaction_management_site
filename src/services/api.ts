@@ -13,3 +13,6 @@ export const addTransaction = (transaction: Transaction) =>
     '/transactions',
     transaction
   );
+
+export const deleteTransaction = (id: number) =>
+  api.delete(`/transactions/${id}`);

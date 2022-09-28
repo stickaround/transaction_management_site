@@ -1,7 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { toast } from 'react-toast';
 
-import { getTransactions, addTransaction } from '../../services/api';
+import {
+  getTransactions,
+  addTransaction,
+  deleteTransaction,
+} from '../../services/api';
 import { RootState } from '../../store';
 import { TransactionStateType } from '../../types';
 import { Transaction } from '../../types/index';
@@ -26,6 +30,14 @@ export const addTransactionSync = createAsyncThunk(
   async (payload: Transaction) => {
     const { data: transaction } = await addTransaction(payload);
     return { transaction };
+  }
+);
+
+export const deleteTransactionSync = createAsyncThunk(
+  '/transaction/deleteTransaction',
+  async (id: number) => {
+    const { data } = await deleteTransaction(id);
+    return data;
   }
 );
 
@@ -63,6 +75,17 @@ const transactionSlice = createSlice({
       })
       .addCase(addTransactionSync.rejected, (state, action) => {
         state.adding = false;
+        toast.error(action?.error?.message || 'Error');
+      })
+      .addCase(deleteTransactionSync.pending, (state) => {
+        state.loading = false;
+      })
+      .addCase(deleteTransactionSync.fulfilled, (state, action) => {
+        state.loading = false;
+        toast.success(action.payload);
+      })
+      .addCase(deleteTransactionSync.rejected, (state, action) => {
+        state.loading = false;
         toast.error(action?.error?.message || 'Error');
       });
   },

@@ -19,11 +19,14 @@ import {
   Delete as DeleteIcon,
   Edit as EditIcon,
 } from '@mui/icons-material';
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
 
 import { Loader } from '../../core/Loader';
 import { TransactionAddModal } from './TransactionAddModal';
 import {
   getTransactionsSync,
+  deleteTransactionSync,
   selectTransactions,
   selectTransactionLoading,
 } from './transactionSlice';
@@ -54,6 +57,27 @@ function Transaction() {
 
   const handleAddTransaction = () => {
     setIsModalOpen(true);
+  };
+
+  const handleDelete = (id: number) => {
+    confirmAlert({
+      title: 'Are you sure to delete this transaction?',
+      buttons: [
+        {
+          label: 'OK',
+          onClick: () => {
+            dispatch(deleteTransactionSync(id))
+              .unwrap()
+              .then(() => {
+                dispatch(getTransactionsSync());
+              });
+          },
+        },
+        {
+          label: 'Cancel',
+        },
+      ],
+    });
   };
 
   const handleCloseModal = () => {
@@ -125,6 +149,7 @@ function Transaction() {
                   <IconButton
                     aria-label='delete'
                     disabled={transaction.status !== 'MANUAL'}
+                    onClick={() => handleDelete(transaction.id ?? 0)}
                   >
                     <DeleteIcon />
                   </IconButton>
