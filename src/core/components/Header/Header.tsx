@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
@@ -22,22 +22,12 @@ const menus = [
 ];
 
 function Header() {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  const navigate = useNavigate();
 
   const navItems = [...menus];
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
-  };
-
-  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
   };
 
   const drawer = (
@@ -62,7 +52,7 @@ function Header() {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <AppBar component='nav' sx={{ zIndex: 0 }}>
+      <AppBar component='nav' sx={{ zIndex: 1 }}>
         <Toolbar>
           <IconButton
             color='inherit'
