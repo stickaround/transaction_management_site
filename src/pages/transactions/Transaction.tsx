@@ -79,7 +79,7 @@ function Transaction() {
       handleDetail(parseInt(transaction_id));
     }
     // eslint-disable-next-line
-  }, [dispatch, queryParams]);
+  }, [dispatch]);
 
   React.useEffect(() => {
     const filtered =
