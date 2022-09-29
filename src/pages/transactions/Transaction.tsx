@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -46,6 +47,7 @@ function Transaction() {
   const transactions = useAppSelector(selectTransactions);
   const transaction = useAppSelector(selectTransaction);
   const loading = useAppSelector(selectTransactionLoading);
+  const [queryParams, setSearchParams] = useSearchParams();
   const [filter, setFilter] = React.useState<{
     merchant: string;
     type: string;
@@ -68,10 +70,15 @@ function Transaction() {
     severity: 'success',
     message: '',
   });
+  const newQueryParams: URLSearchParams = new URLSearchParams();
 
   React.useEffect(() => {
     dispatch(getTransactionsSync());
-  }, [dispatch]);
+    const transaction_id = queryParams.get('transaction_id');
+    if (transaction_id) {
+      handleDetail(parseInt(transaction_id));
+    }
+  }, [dispatch, queryParams]);
 
   React.useEffect(() => {
     const filtered =
@@ -96,6 +103,8 @@ function Transaction() {
   };
 
   const handleDetail = (id: number) => {
+    newQueryParams.set('transaction_id', id.toString());
+    setSearchParams(newQueryParams);
     dispatch(getTransactionSync(id))
       .unwrap()
       .then(() => {
@@ -248,7 +257,11 @@ function Transaction() {
       <TransactionDetailDrawer
         open={isDetailDrawerOpen}
         transaction={transaction}
-        onClose={() => setIsDetailDrawerOpen(false)}
+        onClose={() => {
+          setIsDetailDrawerOpen(false);
+          newQueryParams.delete('transaction_id');
+          setSearchParams(newQueryParams);
+        }}
         onEdit={() => handleEdit(transaction?.id ?? 0)}
       />
       <TransactionEditDrawer
