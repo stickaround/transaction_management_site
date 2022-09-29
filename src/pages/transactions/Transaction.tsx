@@ -78,6 +78,7 @@ function Transaction() {
     if (transaction_id) {
       handleDetail(parseInt(transaction_id));
     }
+    // eslint-disable-next-line
   }, [dispatch, queryParams]);
 
   React.useEffect(() => {
