@@ -4,11 +4,11 @@ import { toast } from 'react-toast';
 import {
   getTransactions,
   addTransaction,
+  getTransaction,
   deleteTransaction,
 } from '../../services/api';
 import { RootState } from '../../store';
-import { TransactionStateType } from '../../types';
-import { Transaction } from '../../types/index';
+import { TransactionStateType, TransactionCreatePayload } from '../../types';
 
 const initialState: TransactionStateType = {
   transactions: [],
@@ -27,8 +27,16 @@ export const getTransactionsSync = createAsyncThunk(
 
 export const addTransactionSync = createAsyncThunk(
   '/transaction/addTransaction',
-  async (payload: Transaction) => {
+  async (payload: TransactionCreatePayload) => {
     const { data: transaction } = await addTransaction(payload);
+    return { transaction };
+  }
+);
+
+export const getTransactionSync = createAsyncThunk(
+  '.transaction/getTransaction',
+  async (id: number) => {
+    const { data: transaction } = await getTransaction(id);
     return { transaction };
   }
 );
@@ -77,6 +85,13 @@ const transactionSlice = createSlice({
         state.adding = false;
         toast.error(action?.error?.message || 'Error');
       })
+      .addCase(getTransactionSync.pending, (state) => {})
+      .addCase(getTransactionSync.fulfilled, (state, action) => {
+        state.transaction = action.payload.transaction;
+      })
+      .addCase(getTransactionSync.rejected, (state, action) => {
+        toast.error(action?.error?.message || 'Error');
+      })
       .addCase(deleteTransactionSync.pending, (state) => {
         state.loading = false;
       })
@@ -101,6 +116,8 @@ export const selectTransactionAdding = (state: RootState) =>
   state.transaction.adding;
 export const selectTransactions = (state: RootState) =>
   state.transaction.transactions;
+export const selectTransaction = (state: RootState) =>
+  state.transaction.transaction;
 
 // Reducer
 const transactionReducer = transactionSlice.reducer;

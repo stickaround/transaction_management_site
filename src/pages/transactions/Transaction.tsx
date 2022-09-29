@@ -24,39 +24,37 @@ import 'react-confirm-alert/src/react-confirm-alert.css';
 
 import { Loader } from '../../core/Loader';
 import { TransactionAddModal } from './TransactionAddModal';
+import { TransactionDetailDrawer } from './TransactionDetailDrawer';
 import {
   getTransactionsSync,
+  getTransactionSync,
   deleteTransactionSync,
   selectTransactions,
+  selectTransaction,
   selectTransactionLoading,
 } from './transactionSlice';
 import { useAppDispatch, useAppSelector } from '../../store/hook';
-
-function getStatusColor(status: string): 'info' | 'warning' | 'success' {
-  switch (status) {
-    case 'MANUAL':
-      return 'info';
-    case 'PENDING':
-      return 'warning';
-    case 'COMPLETED':
-      return 'success';
-    default:
-      return 'info';
-  }
-}
+import { getStatusColor } from '../../helper/index';
 
 function Transaction() {
   const dispatch = useAppDispatch();
   const transactions = useAppSelector(selectTransactions);
+  const transaction = useAppSelector(selectTransaction);
   const loading = useAppSelector(selectTransactionLoading);
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
+  const [isDetailDrawerOpen, setIsDetailDrawerOpen] = React.useState(false);
 
   React.useEffect(() => {
     dispatch(getTransactionsSync());
   }, [dispatch]);
 
   const handleAddTransaction = () => {
-    setIsModalOpen(true);
+    setIsAddModalOpen(true);
+  };
+
+  const handleTransactionDetail = (id: number) => {
+    dispatch(getTransactionSync(id));
+    setIsDetailDrawerOpen(true);
   };
 
   const handleDelete = (id: number) => {
@@ -81,7 +79,7 @@ function Transaction() {
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
+    setIsAddModalOpen(false);
   };
 
   return loading ? (
@@ -115,7 +113,10 @@ function Transaction() {
           </TableHead>
           <TableBody>
             {transactions.map((transaction, index) => (
-              <TableRow key={transaction.id}>
+              <TableRow
+                key={transaction.id}
+                onClick={() => handleTransactionDetail(transaction.id)}
+              >
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{transaction.datetime}</TableCell>
                 <TableCell>{transaction.merchant.name}</TableCell>
@@ -135,7 +136,7 @@ function Transaction() {
                 <TableCell>
                   <Chip
                     label={transaction.status}
-                    color={getStatusColor(transaction.status ?? '')}
+                    color={getStatusColor(transaction.status)}
                   />
                 </TableCell>
                 <TableCell align='center'>
@@ -149,7 +150,7 @@ function Transaction() {
                   <IconButton
                     aria-label='delete'
                     disabled={transaction.status !== 'MANUAL'}
-                    onClick={() => handleDelete(transaction.id ?? 0)}
+                    onClick={() => handleDelete(transaction.id)}
                   >
                     <DeleteIcon />
                   </IconButton>
@@ -159,7 +160,12 @@ function Transaction() {
           </TableBody>
         </Table>
       </Paper>
-      <TransactionAddModal open={isModalOpen} onClose={handleCloseModal} />
+      <TransactionAddModal open={isAddModalOpen} onClose={handleCloseModal} />
+      <TransactionDetailDrawer
+        open={isDetailDrawerOpen}
+        transaction={transaction}
+        onClose={() => setIsDetailDrawerOpen(false)}
+      />
     </Container>
   );
 }

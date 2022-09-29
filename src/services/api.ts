@@ -1,6 +1,10 @@
 import axios, { AxiosResponse } from 'axios';
 
-import { Transaction } from '../types';
+import {
+  Transaction,
+  TransactionCreatePayload,
+  TransactionDetail,
+} from '../types';
 
 const api = axios.create({
   baseURL: process.env.API_URL ?? 'https://psl-mock-api.herokuapp.com',
@@ -8,11 +12,14 @@ const api = axios.create({
 
 export const getTransactions = () => api.get<Transaction[]>('/transactions');
 
-export const addTransaction = (transaction: Transaction) =>
+export const addTransaction = (transaction: TransactionCreatePayload) =>
   api.post<Transaction, AxiosResponse<Transaction>>(
     '/transactions',
     transaction
   );
+
+export const getTransaction = (id: number) =>
+  api.get<TransactionDetail>(`/transactions/${id}`);
 
 export const deleteTransaction = (id: number) =>
   api.delete(`/transactions/${id}`);
