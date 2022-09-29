@@ -23,6 +23,20 @@ export type TransactionCreatePayload = {
 export type TransactionDetail = Transaction & {
   reference: string;
   remarks: string;
+  merchant: {
+    country?: string;
+    category?: string;
+  };
+};
+
+export type TransactionUpdatePayload = {
+  amount: number;
+  merchant: {
+    name: string;
+  };
+  type: 'DEBIT' | 'CREDIT';
+  reference?: string;
+  remarks?: string;
 };
 
 export type TransactionStateType = {

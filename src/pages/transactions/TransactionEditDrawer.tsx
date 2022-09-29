@@ -1,12 +1,11 @@
 import * as React from 'react';
 import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
+  Box,
+  Drawer,
+  Typography,
   FormControl,
   TextField,
-  Box,
+  Button,
   Select,
   MenuItem,
   InputLabel,
@@ -16,15 +15,16 @@ import SendIcon from '@mui/icons-material/Send';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
 
+import { TransactionDetail, Transaction } from '../../types/index';
 import {
-  addTransactionSync,
+  updateTransactionSync,
   selectTransactionAdding,
 } from './transactionSlice';
 import { useAppDispatch, useAppSelector } from '../../store/hook';
-import { Transaction } from '../../types';
 
-type TransactionModalPropTypes = {
+type PropTypes = {
   open: boolean;
+  transaction: TransactionDetail | null;
   onClose: () => void;
 };
 
@@ -33,18 +33,29 @@ const transactionTypes = [
   { label: 'Credit', value: 'CREDIT' },
 ];
 
-function TransactionAddModal(props: TransactionModalPropTypes) {
+function TransactionEditDrawer(props: PropTypes) {
+  const { open, transaction, onClose } = props;
   const dispatch = useAppDispatch();
-  const adding = useAppSelector(selectTransactionAdding);
-  const { open, onClose } = props;
+  const updating = useAppSelector(selectTransactionAdding);
 
-  const transactionAddFormData = useFormik({
+  React.useEffect(() => {
+    transactionEditFormData.setValues({
+      amount: transaction?.amount,
+      merchant: transaction?.merchant.name,
+      type: transaction?.type,
+      reference: transaction?.reference,
+      remarks: transaction?.remarks,
+    });
+    // eslint-disable-next-line
+  }, [transaction]);
+
+  const transactionEditFormData = useFormik({
     initialValues: {
-      amount: 0,
-      merchant: '',
-      type: '',
-      reference: '',
-      remarks: '',
+      amount: transaction?.amount,
+      merchant: transaction?.merchant.name,
+      type: transaction?.type,
+      reference: transaction?.reference,
+      remarks: transaction?.remarks,
     },
     validationSchema: Yup.object({
       amount: Yup.number().positive().required('Amount is required!'),
@@ -56,36 +67,37 @@ function TransactionAddModal(props: TransactionModalPropTypes) {
       if (!type) return;
 
       dispatch(
-        addTransactionSync({
-          amount,
-          merchant: {
-            name: merchant,
+        updateTransactionSync({
+          id: transaction?.id ?? 0,
+          payload: {
+            amount: amount ?? 0,
+            merchant: {
+              name: merchant ?? '',
+            },
+            type: type as Transaction['type'],
+            reference: reference,
+            remarks: remarks,
           },
-          type: type as Transaction['type'],
-          reference,
-          remarks,
         })
       )
         .unwrap()
         .then(() => {
-          transactionAddFormData.resetForm();
+          transactionEditFormData.resetForm();
           onClose();
         });
     },
   });
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      aria-labelledby='alert-dialog-title'
-      aria-describedby='alert-dialog-description'
-    >
-      <DialogTitle id='alert-dialog-title' variant='h4'>
-        Add a new transaction
-      </DialogTitle>
-      <DialogContent>
-        <Box component='form' onSubmit={transactionAddFormData.handleSubmit}>
+    <Drawer anchor='right' open={open} onClose={onClose}>
+      <Box
+        sx={{ width: '600px', marginTop: '200px', marginX: '40px' }}
+        role='presentation'
+      >
+        <Typography variant='h3' color='primary' sx={{ mr: 3 }}>
+          Transaction Edit
+        </Typography>
+        <Box component='form' onSubmit={transactionEditFormData.handleSubmit}>
           <FormControl fullWidth sx={{ my: 4 }}>
             <TextField
               id='amount'
@@ -94,15 +106,15 @@ function TransactionAddModal(props: TransactionModalPropTypes) {
               variant='outlined'
               type='number'
               error={
-                !!transactionAddFormData.errors.amount &&
-                transactionAddFormData.touched.amount
+                !!transactionEditFormData.errors.amount &&
+                transactionEditFormData.touched.amount
               }
               helperText={
-                transactionAddFormData.touched.amount &&
-                transactionAddFormData.errors.amount
+                transactionEditFormData.touched.amount &&
+                transactionEditFormData.errors.amount
               }
-              onChange={transactionAddFormData.handleChange}
-              value={transactionAddFormData.values.amount}
+              onChange={transactionEditFormData.handleChange}
+              value={transactionEditFormData.values.amount}
             />
           </FormControl>
           <FormControl fullWidth sx={{ mb: 4 }}>
@@ -112,23 +124,23 @@ function TransactionAddModal(props: TransactionModalPropTypes) {
               name='merchant'
               variant='outlined'
               error={
-                !!transactionAddFormData.errors.merchant &&
-                transactionAddFormData.touched.merchant
+                !!transactionEditFormData.errors.merchant &&
+                transactionEditFormData.touched.merchant
               }
               helperText={
-                transactionAddFormData.touched.merchant &&
-                transactionAddFormData.errors.merchant
+                transactionEditFormData.touched.merchant &&
+                transactionEditFormData.errors.merchant
               }
-              onChange={transactionAddFormData.handleChange}
-              value={transactionAddFormData.values.merchant}
+              onChange={transactionEditFormData.handleChange}
+              value={transactionEditFormData.values.merchant}
             />
           </FormControl>
           <FormControl
             fullWidth
             sx={{ mb: 4 }}
             error={
-              !!transactionAddFormData.errors.type &&
-              transactionAddFormData.touched.type
+              !!transactionEditFormData.errors.type &&
+              transactionEditFormData.touched.type
             }
           >
             <InputLabel id='type-label'>Type</InputLabel>
@@ -137,8 +149,8 @@ function TransactionAddModal(props: TransactionModalPropTypes) {
               label='Type'
               id='type'
               name='type'
-              value={transactionAddFormData.values.type}
-              onChange={transactionAddFormData.handleChange}
+              value={transactionEditFormData.values.type}
+              onChange={transactionEditFormData.handleChange}
             >
               {transactionTypes.map((type, index) => (
                 <MenuItem key={type.value + index} value={type.value}>
@@ -146,11 +158,11 @@ function TransactionAddModal(props: TransactionModalPropTypes) {
                 </MenuItem>
               ))}
             </Select>
-            {!!transactionAddFormData.errors.type &&
-              transactionAddFormData.touched.type && (
+            {!!transactionEditFormData.errors.type &&
+              transactionEditFormData.touched.type && (
                 <FormHelperText>
-                  {transactionAddFormData.touched.type &&
-                    transactionAddFormData.errors.type}
+                  {transactionEditFormData.touched.type &&
+                    transactionEditFormData.errors.type}
                 </FormHelperText>
               )}
           </FormControl>
@@ -160,8 +172,8 @@ function TransactionAddModal(props: TransactionModalPropTypes) {
               label='Reference'
               name='reference'
               variant='outlined'
-              onChange={transactionAddFormData.handleChange}
-              value={transactionAddFormData.values.reference}
+              onChange={transactionEditFormData.handleChange}
+              value={transactionEditFormData.values.reference}
             />
           </FormControl>
           <FormControl fullWidth sx={{ mb: 4 }}>
@@ -172,8 +184,8 @@ function TransactionAddModal(props: TransactionModalPropTypes) {
               variant='outlined'
               multiline
               rows={3}
-              onChange={transactionAddFormData.handleChange}
-              value={transactionAddFormData.values.remarks}
+              onChange={transactionEditFormData.handleChange}
+              value={transactionEditFormData.values.remarks}
             />
           </FormControl>
           <FormControl>
@@ -181,15 +193,15 @@ function TransactionAddModal(props: TransactionModalPropTypes) {
               type='submit'
               variant='contained'
               startIcon={<SendIcon />}
-              disabled={adding}
+              disabled={updating}
             >
               Submit
             </Button>
           </FormControl>
         </Box>
-      </DialogContent>
-    </Dialog>
+      </Box>
+    </Drawer>
   );
 }
 
-export { TransactionAddModal };
+export { TransactionEditDrawer };

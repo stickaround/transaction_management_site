@@ -8,10 +8,11 @@ type PropTypes = {
   open: boolean;
   transaction: TransactionDetail | null;
   onClose: () => void;
+  onEdit: () => void;
 };
 
 function TransactionDetailDrawer(props: PropTypes) {
-  const { open, transaction, onClose } = props;
+  const { open, transaction, onClose, onEdit } = props;
 
   return (
     <Drawer anchor='right' open={open} onClose={onClose}>
@@ -24,7 +25,7 @@ function TransactionDetailDrawer(props: PropTypes) {
             Transaction Details
           </Typography>
           {transaction?.status === 'MANUAL' && (
-            <IconButton aria-label='edit'>
+            <IconButton aria-label='edit' onClick={onEdit}>
               <EditIcon sx={{ fontSize: 30 }} />
             </IconButton>
           )}

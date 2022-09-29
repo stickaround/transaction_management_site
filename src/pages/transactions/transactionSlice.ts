@@ -5,10 +5,15 @@ import {
   getTransactions,
   addTransaction,
   getTransaction,
+  updateTransaction,
   deleteTransaction,
 } from '../../services/api';
 import { RootState } from '../../store';
-import { TransactionStateType, TransactionCreatePayload } from '../../types';
+import {
+  TransactionStateType,
+  TransactionCreatePayload,
+  TransactionUpdatePayload,
+} from '../../types';
 
 const initialState: TransactionStateType = {
   transactions: [],
@@ -37,6 +42,20 @@ export const getTransactionSync = createAsyncThunk(
   '.transaction/getTransaction',
   async (id: number) => {
     const { data: transaction } = await getTransaction(id);
+    return { transaction };
+  }
+);
+
+export const updateTransactionSync = createAsyncThunk(
+  '/transaction/updateTransaction',
+  async ({
+    id,
+    payload,
+  }: {
+    id: number;
+    payload: TransactionUpdatePayload;
+  }) => {
+    const { data: transaction } = await updateTransaction(id, payload);
     return { transaction };
   }
 );
@@ -90,6 +109,21 @@ const transactionSlice = createSlice({
         state.transaction = action.payload.transaction;
       })
       .addCase(getTransactionSync.rejected, (state, action) => {
+        toast.error(action?.error?.message || 'Error');
+      })
+      .addCase(updateTransactionSync.pending, (state) => {
+        state.adding = true;
+      })
+      .addCase(updateTransactionSync.fulfilled, (state, action) => {
+        state.adding = false;
+        const index = state.transactions.findIndex(
+          (item) => item.id === action.payload.transaction.id
+        );
+        state.transactions.splice(index, 1, action.payload.transaction);
+        toast.success('Transaction updated successfully!');
+      })
+      .addCase(updateTransactionSync.rejected, (state, action) => {
+        state.adding = false;
         toast.error(action?.error?.message || 'Error');
       })
       .addCase(deleteTransactionSync.pending, (state) => {

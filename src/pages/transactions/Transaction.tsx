@@ -25,6 +25,7 @@ import 'react-confirm-alert/src/react-confirm-alert.css';
 import { Loader } from '../../core/Loader';
 import { TransactionAddModal } from './TransactionAddModal';
 import { TransactionDetailDrawer } from './TransactionDetailDrawer';
+import { TransactionEditDrawer } from './TransactionEditDrawer';
 import {
   getTransactionsSync,
   getTransactionSync,
@@ -43,18 +44,31 @@ function Transaction() {
   const loading = useAppSelector(selectTransactionLoading);
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
   const [isDetailDrawerOpen, setIsDetailDrawerOpen] = React.useState(false);
+  const [isEditDrawerOpen, setIsEditDrawerOpen] = React.useState(false);
 
   React.useEffect(() => {
     dispatch(getTransactionsSync());
   }, [dispatch]);
 
-  const handleAddTransaction = () => {
+  const handleAdd = () => {
     setIsAddModalOpen(true);
   };
 
-  const handleTransactionDetail = (id: number) => {
-    dispatch(getTransactionSync(id));
-    setIsDetailDrawerOpen(true);
+  const handleDetail = (id: number) => {
+    dispatch(getTransactionSync(id))
+      .unwrap()
+      .then(() => {
+        setIsDetailDrawerOpen(true);
+      });
+  };
+
+  const handleEdit = (id: number) => {
+    dispatch(getTransactionSync(id))
+      .unwrap()
+      .then(() => {
+        setIsDetailDrawerOpen(false);
+        setIsEditDrawerOpen(true);
+      });
   };
 
   const handleDelete = (id: number) => {
@@ -94,7 +108,7 @@ function Transaction() {
           sx={{ ml: 'auto' }}
           variant='contained'
           startIcon={<AddIcon />}
-          onClick={handleAddTransaction}
+          onClick={handleAdd}
         >
           Add new transaction
         </Button>
@@ -115,7 +129,7 @@ function Transaction() {
             {transactions.map((transaction, index) => (
               <TableRow
                 key={transaction.id}
-                onClick={() => handleTransactionDetail(transaction.id)}
+                onClick={(e) => handleDetail(transaction.id)}
               >
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{transaction.datetime}</TableCell>
@@ -144,13 +158,20 @@ function Transaction() {
                     aria-label='edit'
                     disabled={transaction.status !== 'MANUAL'}
                     sx={{ zIndex: 0 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit(transaction.id);
+                    }}
                   >
                     <EditIcon />
                   </IconButton>
                   <IconButton
                     aria-label='delete'
                     disabled={transaction.status !== 'MANUAL'}
-                    onClick={() => handleDelete(transaction.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(transaction.id);
+                    }}
                   >
                     <DeleteIcon />
                   </IconButton>
@@ -165,6 +186,12 @@ function Transaction() {
         open={isDetailDrawerOpen}
         transaction={transaction}
         onClose={() => setIsDetailDrawerOpen(false)}
+        onEdit={() => handleEdit(transaction?.id ?? 0)}
+      />
+      <TransactionEditDrawer
+        open={isEditDrawerOpen}
+        transaction={transaction}
+        onClose={() => setIsEditDrawerOpen(false)}
       />
     </Container>
   );

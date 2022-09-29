@@ -4,6 +4,7 @@ import {
   Transaction,
   TransactionCreatePayload,
   TransactionDetail,
+  TransactionUpdatePayload,
 } from '../types';
 
 const api = axios.create({
@@ -20,6 +21,15 @@ export const addTransaction = (transaction: TransactionCreatePayload) =>
 
 export const getTransaction = (id: number) =>
   api.get<TransactionDetail>(`/transactions/${id}`);
+
+export const updateTransaction = (
+  id: number,
+  payload: TransactionUpdatePayload
+) =>
+  api.patch<Transaction, AxiosResponse<TransactionDetail>>(
+    `/transactions/${id}`,
+    payload
+  );
 
 export const deleteTransaction = (id: number) =>
   api.delete(`/transactions/${id}`);
