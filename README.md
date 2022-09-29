@@ -12,6 +12,8 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ## How to start the project
 
+First copy and past the `.env.example`file and rename it to `.env` And run the command below.
+
 ### `npm start`
 
 ## How to run test
