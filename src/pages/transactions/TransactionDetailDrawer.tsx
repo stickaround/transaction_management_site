@@ -35,7 +35,7 @@ function TransactionDetailDrawer(props: PropTypes) {
             Date & Time
           </Typography>
           <Typography variant='h5' color='text.secondary'>
-            {transaction?.datetime}
+            {new Date(transaction?.datetime ?? '').toDateString()}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: '20px' }}>

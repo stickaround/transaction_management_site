@@ -26,6 +26,15 @@ import { Transaction } from '../../types';
 type TransactionModalPropTypes = {
   open: boolean;
   onClose: () => void;
+  setSnackbarOptions: ({
+    open,
+    severity,
+    message,
+  }: {
+    open: boolean;
+    severity: 'success' | 'error';
+    message: string;
+  }) => void;
 };
 
 const transactionTypes = [
@@ -36,7 +45,7 @@ const transactionTypes = [
 function TransactionAddModal(props: TransactionModalPropTypes) {
   const dispatch = useAppDispatch();
   const adding = useAppSelector(selectTransactionAdding);
-  const { open, onClose } = props;
+  const { open, onClose, setSnackbarOptions } = props;
 
   const transactionAddFormData = useFormik({
     initialValues: {
@@ -68,8 +77,20 @@ function TransactionAddModal(props: TransactionModalPropTypes) {
       )
         .unwrap()
         .then(() => {
+          setSnackbarOptions({
+            open: true,
+            severity: 'success',
+            message: 'Successfully created!',
+          });
           transactionAddFormData.resetForm();
           onClose();
+        })
+        .catch(() => {
+          setSnackbarOptions({
+            open: true,
+            severity: 'error',
+            message: 'Creation failed!',
+          });
         });
     },
   });

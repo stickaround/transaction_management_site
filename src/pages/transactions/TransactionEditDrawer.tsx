@@ -26,6 +26,15 @@ type PropTypes = {
   open: boolean;
   transaction: TransactionDetail | null;
   onClose: () => void;
+  setSnackbarOptions: ({
+    open,
+    severity,
+    message,
+  }: {
+    open: boolean;
+    severity: 'success' | 'error';
+    message: string;
+  }) => void;
 };
 
 const transactionTypes = [
@@ -34,7 +43,7 @@ const transactionTypes = [
 ];
 
 function TransactionEditDrawer(props: PropTypes) {
-  const { open, transaction, onClose } = props;
+  const { open, transaction, onClose, setSnackbarOptions } = props;
   const dispatch = useAppDispatch();
   const updating = useAppSelector(selectTransactionAdding);
 
@@ -82,8 +91,20 @@ function TransactionEditDrawer(props: PropTypes) {
       )
         .unwrap()
         .then(() => {
+          setSnackbarOptions({
+            open: true,
+            severity: 'success',
+            message: 'Successfully updated!',
+          });
           transactionEditFormData.resetForm();
           onClose();
+        })
+        .catch(() => {
+          setSnackbarOptions({
+            open: true,
+            severity: 'error',
+            message: 'Update failed!',
+          });
         });
     },
   });
@@ -195,7 +216,7 @@ function TransactionEditDrawer(props: PropTypes) {
               startIcon={<SendIcon />}
               disabled={updating}
             >
-              Submit
+              Save
             </Button>
           </FormControl>
         </Box>

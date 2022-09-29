@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { toast } from 'react-toast';
 
 import {
   getTransactions,
@@ -87,7 +86,6 @@ const transactionSlice = createSlice({
       })
       .addCase(getTransactionsSync.rejected, (state, action) => {
         state.loading = false;
-        toast.error(action?.error?.message || 'Error');
       })
       .addCase(addTransactionSync.pending, (state) => {
         state.adding = true;
@@ -98,19 +96,15 @@ const transactionSlice = createSlice({
           action.payload.transaction,
           ...state.transactions,
         ];
-        toast.success('Transaction added successfully!');
       })
       .addCase(addTransactionSync.rejected, (state, action) => {
         state.adding = false;
-        toast.error(action?.error?.message || 'Error');
       })
       .addCase(getTransactionSync.pending, (state) => {})
       .addCase(getTransactionSync.fulfilled, (state, action) => {
         state.transaction = action.payload.transaction;
       })
-      .addCase(getTransactionSync.rejected, (state, action) => {
-        toast.error(action?.error?.message || 'Error');
-      })
+      .addCase(getTransactionSync.rejected, (state, action) => {})
       .addCase(updateTransactionSync.pending, (state) => {
         state.adding = true;
       })
@@ -120,22 +114,18 @@ const transactionSlice = createSlice({
           (item) => item.id === action.payload.transaction.id
         );
         state.transactions.splice(index, 1, action.payload.transaction);
-        toast.success('Transaction updated successfully!');
       })
       .addCase(updateTransactionSync.rejected, (state, action) => {
         state.adding = false;
-        toast.error(action?.error?.message || 'Error');
       })
       .addCase(deleteTransactionSync.pending, (state) => {
         state.loading = false;
       })
       .addCase(deleteTransactionSync.fulfilled, (state, action) => {
         state.loading = false;
-        toast.success(action.payload);
       })
       .addCase(deleteTransactionSync.rejected, (state, action) => {
         state.loading = false;
-        toast.error(action?.error?.message || 'Error');
       });
   },
 });
